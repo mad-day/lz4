@@ -6,3 +6,10 @@ Unlike pierrec's version, this one exposes Low level routines only, that are mea
 
 The goal of this fork is, to retain the Low level interface exposed by the `revert-8-master` version of `github.com/pierrec/lz4` in order to
 allow the implementation of efficient delta-compression techniques.
+
+### Additional code.
+
+The package contains two further functions, namely `SplitCompressedBlock` and `MergeCompressedBlock`,
+which split a compressed block into literal and non-literal data. The code is derived from the
+function `UncompressBlock`.
+
