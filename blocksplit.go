@@ -32,12 +32,17 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 package lz4
 
+import "fmt"
+
+var eDEBUG = fmt.Errorf("DEBUG 1")
 
 // SplitCompressedBlock splits the source buffer into the control bytes (d1) and literal (d2).
 //
 // The destination buffers can be preallocated by doing:
 //   d1 := make([]byte,0,1<<16)
 //   d2 := make([]byte,0,1<<16)
+//
+// Bug: This function is bugged, dont use it.
 func SplitCompressedBlock(src []byte, d1,d2 *[]byte) (error) {
 	di := 0
 	si, sn := 0, len(src)
@@ -113,6 +118,8 @@ func SplitCompressedBlock(src []byte, d1,d2 *[]byte) (error) {
 //
 // The destination buffer can be preallocated by doing:
 //   d1 := make([]byte,0,1<<16)
+//
+// Bug: This function is bugged, dont use it.
 func MergeCompressedBlock(src, lit []byte, d1 *[]byte) (error) {
 	di := 0
 	si, sn := 0, len(src)
@@ -144,9 +151,9 @@ func MergeCompressedBlock(src, lit []byte, d1 *[]byte) (error) {
 					}
 				}
 				lLen += int(src[si])
-				if si++; si == sn {
-					return ErrInvalidSource
-				}
+				//if si++; si == sn {
+				//	return eDEBUG//ErrInvalidSource
+				//}
 			}
 			if li+lLen > ln {
 				return ErrShortBuffer
@@ -161,7 +168,8 @@ func MergeCompressedBlock(src, lit []byte, d1 *[]byte) (error) {
 			}
 		}
 
-		if si += 2; si >= sn {
+		si += 2
+		if si >= sn {
 			return ErrInvalidSource
 		}
 		offset := int(src[si-2]) | int(src[si-1])<<8
@@ -171,6 +179,7 @@ func MergeCompressedBlock(src, lit []byte, d1 *[]byte) (error) {
 
 		// match
 		if mLen == 0xF {
+			//if si >= sn { return ErrInvalidSource }
 			for src[si] == 0xFF {
 				mLen += 0xFF
 				if si++; si == sn {
